@@ -5,6 +5,10 @@ import { Employee } from "../types/employee";
 
 const EmployeeTable = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -15,6 +19,20 @@ const EmployeeTable = () => {
 
     fetchEmployees();
   }, []);
+
+  const handleUpdateClick = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsModalOpen(true);
+  };
+
+  const saveEmployee = (updatedEmployee: Employee) => {
+    setEmployees((prevEmployees) =>
+      prevEmployees.map((emp) =>
+        emp.id === updatedEmployee.id ? updatedEmployee : emp
+      )
+    );
+    setIsModalOpen(false);
+  };
 
   return (
     <>
@@ -48,11 +66,28 @@ const EmployeeTable = () => {
                 <td className="px-6 text-black py-4">
                   {employee.isActive ? "ACTIVE" : "DEACTIVATED"}
                 </td>
+                <td className="px-6 py-4">
+                  {employee.isActive && (
+                    <button
+                      onClick={() => handleUpdateClick(employee)}
+                      className="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none"
+                    >
+                      Update
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {isModalOpen && (
+        <UpdateModal
+          employee={selectedEmployee}
+          closeModal={() => setIsModalOpen(false)}
+          saveEmployee={saveEmployee}
+        />
+      )}
     </>
   );
 };
